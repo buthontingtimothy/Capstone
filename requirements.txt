@@ -1,4 +1,11 @@
 numpy
 pandas
-sentence_transformers
+sentence-transformers
 tqdm
+scikit-learn
+ipywidgets 
+widgetsnbextension 
+pandas-profiling
+torch
+torchvision
+torchaudio
