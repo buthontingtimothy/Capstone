@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from match import get_top_matches
+from find_match import get_top_matches
 from sentence_transformers import SentenceTransformer
 
 

@@ -71,7 +71,7 @@ def get_top_matches(user_id, similarity_df, user_df, top_n=5,
 
     # Flexible Text-Based Filters
     text_filters = {
-        "education": education, "job": job, "speaks": speaks, "ethnicity": ethnicity
+        "education": education, "job": job, "speaks": speaks, "ethnicity": ethnicity, "sign": sign, "religion": religion
     }
     
     for column, value in text_filters.items():
@@ -124,8 +124,7 @@ def get_top_matches(user_id, similarity_df, user_df, top_n=5,
 
     # Exact Match Filters (Categories)
     category_filters = {
-        "body_type": body_type, "drinks": drinks, "drugs": drugs,
-        "religion": religion, "sign": sign, "smokes": smokes
+        "body_type": body_type, "drinks": drinks, "drugs": drugs, "smokes": smokes
     }
 
     for column, value in category_filters.items():
