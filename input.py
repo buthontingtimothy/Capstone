@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
-# from tqdm.auto import tqdm
+from match import get_top_matches
 from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
 
 
 def generate_demographic_sentence(row):
@@ -119,42 +118,53 @@ def similarity_input(embeddings, embeddings_matrix):
     Calculate the similarity between the user input and all profiles in the dataset.
     """
     # Calculate the cosine similarity between the input and all profiles
-    similarities = np.dot(embeddings, embeddings_matrix.T)/(
-        np.linalg.norm(embeddings, axis=1)*np.linalg.norm(embeddings_matrix.T))
-    
+    dot_product = np.dot(embeddings, embeddings_matrix.T)  # Shape (2, 1)
+    norm_array1 = np.linalg.norm(embeddings, axis=1, keepdims=True)  # Shape (2, 1)
+    norm_array2 = np.linalg.norm(embeddings_matrix, axis=1, keepdims=True)  # Shape (1, 1)
+
+    similarities = dot_product / (norm_array1 * norm_array2.T)  # Shape (2, 1)
+        
     return similarities
 
 
-input_dict = {'age': 22.0,
- 'status': 'single',
- 'sex': 'male',
- 'orientation': 'straight',
- 'body_type': 'a little extra',
- 'diet': 'strictly anything',
- 'drinks': 'socially',
- 'drugs': 'never',
- 'education': 'working on college/university',
- 'ethnicity': 'asian, white',
- 'height': 190.0,
- 'job': 'transportation',
- 'location': 'south san francisco, california',
- 'offspring': "doesn't have kids, but might want them",
- 'pets': 'likes dogs and likes cats',
- 'religion': 'agnosticism and very serious about it',
- 'sign': 'gemini',
- 'smokes': 'sometimes',
- 'speaks': 'english',
- 'essay_all': "about me"}
+def generate_top_matches_result(input_dict, top_n=10, **kwarg):
 
-embeddings_matrix = np.load("okcupid_profiles_preprocessed.npy")
-sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
-embeddings = input_embedding(input_dict, sbert_model)
+    embeddings_matrix = np.load("okcupid_profiles_preprocessed.npy")
+    sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
+    embeddings = input_embedding(input_dict, sbert_model)
+    similarity = similarity_input(embeddings, embeddings_matrix)
+    similarity_df = pd.DataFrame(similarity)
+    user_df = pd.read_csv("okcupid_profiles_cleaned.csv")
+    result = get_top_matches(0, similarity_df, user_df, top_n, **kwarg)
+    return result
 
-similarity = similarity_input(embeddings, embeddings_matrix[:2])
-print(similarity.shape)
+# Sample Testing Data
+# input_dict = {
+#     'age': 22.0,
+#     'status': 'single',
+#     'sex': 'male',
+#     'orientation': 'straight',
+#     'body_type': 'a little extra',
+#     'diet': 'strictly anything',
+#     'drinks': 'socially',
+#     'drugs': 'never',
+#     'education': 'working on college/university',
+#     'ethnicity': 'asian, white',
+#     'height': 190.0,
+#     'job': 'transportation',
+#     'location': 'south san francisco, california',
+#     'offspring': "doesn't have kids, but might want them",
+#     'pets': 'likes dogs and likes cats',
+#     'religion': 'agnosticism and very serious about it',
+#     'sign': 'gemini',
+#     'smokes': 'sometimes',
+#     'speaks': 'english',
+#     'essay_all': """about me:  i would love to think that i was some some kind of intellectual: either the dumbest smart guy, or the smartest dumb guy. can't say i 
+# can tell the difference. i love to talk about ideas and concepts. i forge odd metaphors instead of reciting cliches. like the simularities between a friend of mine's house and an underwater salt mine. my favorite word is salt by the way (weird choice i know). to me most things in life are 
+# better as metaphors. i seek to make myself a little better everyday, in some productively lazy way. got tired of tying my shoes. considered hiring a five year old, but would probably have to tie both of our shoes... decided to only wear leather shoes dress shoes.  about you:  you love to have really serious, really deep conversations about really silly stuff. you have to be willing to snap me out of a light hearted rant with a kiss. you don't have to be funny, but you have to be able to make me laugh. you should be able to bend spoons with your mind, and telepathically make me smile while i am still at work. you should love life, and be cool with just letting the wind blow. extra points for reading all this and guessing my favorite video game (no hints given yet). and lastly you have a good attention span.,currently working as an international agent for a freight forwarding company. import, export, domestic you know the works. online classes and trying to better myself in my free time. perhaps a hours worth of a good book or a video game on a lazy sunday.,making people laugh. ranting about a good salting. finding simplicity in complexity, and complexity in simplicity.,the way i look. i am a six foot half asian, half caucasian mutt. it makes it tough not to notice me, and for me to blend in.,books: absurdistan, the republic, of mice and men (only book that made me want to cry), catcher in the rye, the prince.  movies: gladiator, operation valkyrie, the producers, down periscope.  shows: the borgia, arrested development, game of thrones, monty python  music: aesop rock, 
+# hail mary mallon, george thorogood and the delaware destroyers, felt  food: i'm down for anything.,food. water. cell phone. shelter.,duality and 
+# humorous things,trying to find someone to hang out with. i am down for anything except a club.,i am new to california and looking for someone to 
+# wisper my secrets to.,you want to be swept off your feet! you are tired of the norm. you want to catch a coffee or a bite. or if you want to talk philosophy."""
+# }
 
-em_add = np.array([embeddings, embeddings_matrix[:2]])
-em_add.shape
-
-len([embeddings, embeddings_matrix[:2]])
-cosine_similarity(embeddings)
+# result = generate_top_matches_result(input_dict, age_range=[30,40], height_range=[170,200])
