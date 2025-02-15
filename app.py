@@ -1,16 +1,18 @@
 import pandas as pd
 import streamlit as st
 from input import generate_top_matches_result
+from PIL import Image
 
 # Streamlit app
 def main():
-
+    image = Image.open("pic.png")
+    st.image(image)
     st.title('Find Your Perfect Match on Earth')
 
     # Create two columns: left for user input, right for filters
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("Personal info: ")
+        st.subheader("Personal info ")
 
         #age
         age_input = st.number_input("Enter your age:",min_value=16,max_value=120,step=1,value=None,placeholder="Type a number...")
