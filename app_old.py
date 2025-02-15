@@ -91,24 +91,9 @@ def main():
         choice_pets_have = ['has dogs', 'has cats', 'no pets']
         have_pets_option = ", ".join(st.multiselect('Do you have any dogs or cats? (you can select more than one):', choice_pets_have, max_selections=2))
 
-        if 'no pets' in have_pets_option and any(option in have_pets_option for option in ['has dogs', 'has cats']):
-            have_pets_option = 'N/A'
-            st.warning("You cannot select any other options when 'no pets' is chosen.")
-
-
         #pets_like(muiti)
         choice_pets_like = ['likes dogs', 'likes cats', 'neutral to pets', 'dislikes dogs', 'dislikes cats']
         like_pets_option = ", ".join(st.multiselect('What is your preference regarding dogs and cats? (you can select more than one):', choice_pets_like, max_selections=2))
-        
-        if 'likes dogs' in like_pets_option and 'dislikes dogs' in like_pets_option:
-            like_pets_option = 'N/A'
-            st.warning("You cannot select 'likes dogs' and 'dislikes dogs' at the same time.")
-        if 'likes cats' in like_pets_option and 'dislikes cats' in like_pets_option:
-            like_pets_option = 'N/A'
-            st.warning("You cannot select 'likes cats' and 'dislikes cats' at the same time.")
-        if 'neutral to pets' in like_pets_option and any(option in like_pets_option for option in ['likes dogs', 'likes cats', 'dislikes dogs', 'dislikes cats']):
-            st.warning("You cannot select 'neutral to pets' along with any other preference.")
-            like_pets_option = 'N/A'
 
         #religion
         choice_religin = ['<select>', 'Agnosticism', 'Atheism', 'Buddhism', 'Catholicism', 'Christianity','Hinduism', 'Islam', 'Judaism', 'Other', 'Irreligion']

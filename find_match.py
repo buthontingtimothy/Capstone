@@ -76,7 +76,7 @@ def get_top_matches(user_id, similarity_df, user_df, top_n=5,
     
     for column, value in text_filters.items():
         if value:
-            valid_matches = valid_matches[valid_matches[column].str.contains(value, case=False, na=False)]
+            valid_matches = valid_matches[valid_matches[column].str.contains('|'.join(value), case=False, na=False)]
 
     # *🔹 Fuzzy Diet Matching*
     if diet:
