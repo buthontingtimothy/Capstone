@@ -1,12 +1,30 @@
+# Description: This script contains the function to find top N matches for a given user, with optional flexible filters.
+
 import pandas as pd
 
-def get_top_matches(user_id, similarity_df, user_df, top_n=5, 
-                    age_range=None, height_range=None, location=None, 
-                    education=None, job=None, pets=None, offspring=None, 
-                    speaks=None, ethnicity=None, diet=None, 
-                    body_type=None, drinks=None, drugs=None, 
-                    religion=None, sign=None, smokes=None, 
-                    keyword_filter=None):
+def get_top_matches(
+    user_id,
+    similarity_df,
+    user_df,
+    top_n=5,
+    age_range=None,
+    height_range=None,
+    location=None,
+    education=None,
+    job=None,
+    pets=None,
+    offspring=None,
+    speaks=None,
+    ethnicity=None,
+    diet=None,
+    body_type=None,
+    drinks=None,
+    drugs=None,
+    religion=None,
+    sign=None,
+    smokes=None,
+    keyword_filter=None
+):
     """
     Returns top N matches for a given user, with optional flexible filters.
 
@@ -145,6 +163,6 @@ def get_top_matches(user_id, similarity_df, user_df, top_n=5,
         filtered_similarities = filtered_similarities.loc[keyword_filtered_users]
 
     # Return top N matches
-    top_matches = filtered_similarities.sort_values(ascending=False).head(top_n)
+    top_matches = filtered_similarities.nlargest(top_n)
     
     return user_df.loc[top_matches.index].assign(similarity_score=top_matches.values)
