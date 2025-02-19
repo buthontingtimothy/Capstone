@@ -9,3 +9,4 @@ pandas-profiling
 torch
 torchvision
 torchaudio
+streamlit
