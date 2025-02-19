@@ -1,6 +1,11 @@
+# Description: This file contains the functions to preprocess the input data and generate the top matches for the user input.
+
+# data manipulation
 import numpy as np
 import pandas as pd
+# get_top_matches function from find_match.py
 from find_match import get_top_matches
+# Sentence embeddings
 from sentence_transformers import SentenceTransformer
 
 
@@ -27,33 +32,31 @@ def generate_demographic_sentence(row):
     speaks = row['speaks'] if pd.notna(row['speaks']) else "an unspecified language proficiency"
 
     # Construct the long descriptive sentence
-    sentence = (f"{sex}, {status}, living in {location}, sexual orientation is {orientation}. "
-                f"Has {body_type} body type and ethnicity is {ethnicity}. "
-                f"Education level: {education}. industry: {job}. "
-                f"Dietary preference: {diet}. Drinking habit: {drinks}. "
-                f"Smoking habit: {smokes}. Drug use: {drugs}. "
-                f"Pet preference: {pets}. Religion: {religion}. Zodiac sign: {sign}. "
-                f"Speaks: {speaks}.")
+    sentence = (
+        f"{sex}, {status}, living in {location}, sexual orientation is {orientation}. "
+        f"Has {body_type} body type and ethnicity is {ethnicity}. "
+        f"Education level: {education}. Industry: {job}. "
+        f"Dietary preference: {diet}. Drinking habit: {drinks}. "
+        f"Smoking habit: {smokes}. Drug use: {drugs}. "
+        f"Pet preference: {pets}. Religion: {religion}. Zodiac sign: {sign}. "
+        f"Speaks: {speaks}."
+    )
     
     return sentence
 
-# Generate demographic sentences for each user
 def combine_demographics_essay(row):
     """
     Combine demographic data and essay data into a single sentence.
     """
+    # Generate a long descriptive sentence for the demographic data
     demographic_sentence = generate_demographic_sentence(row)
+    # Fill missing values with an empty string
     essay = row['essay_all'] if pd.notna(row['essay_all']) else ""
+    # Combine demographic data and essay data into a single sentence
     sentence = demographic_sentence + " " + essay
+
     return sentence
 
-
-def sentence_embeddings(texts, model):
-    """
-    Generate sentence embeddings using a pre-trained Sentence Transformer model.
-    """
-    embeddings = model.encode(texts, show_progress_bar=False)
-    return embeddings
 
 def generate_embeddings(df, model):
     """
@@ -63,27 +66,34 @@ def generate_embeddings(df, model):
     sentences = df.apply(combine_demographics_essay, axis=1).tolist()
 
     # Generate sentence embeddings
-    embeddings = sentence_embeddings(sentences, model)
+    embeddings = model.encode(sentences, show_progress_bar=False)
     
     return embeddings
 
 
-def standardize_numeric(df):
+def standardize_numeric(df, path_original_data):
     """
     Standardize non-text features in the dataset.
     """
+    # Make a copy of the DataFrame to avoid modifying the original DataFrame
     df = df.copy()
 
+    # Standardize numeric features
     for col in df.columns:
+        # Standardize columns with numeric data types
         if (df[col].dtype == 'float64') or (df[col].dtype == 'int64'):
+            # Standardize the column if there is more than one row in the DataFrame
             if len(df) != 1:
+                # Standardize the column using the median and standard deviation of the column
                 df[col] = (df[col] - df[col].median()) / df[col].std()
             else:
-                df_temp = pd.read_csv("okcupid_profiles_cleaned.csv")                
+                # If there is only one row in the DataFrame, standardize using the median and standard deviation from the original dataset
+                df_temp = pd.read_csv(path_original_data)          
+                # Standardize the column using the median and standard deviation from the original dataset      
                 df[col] = (df[col] - df_temp[col].median()) / df_temp[col].std()
     return df
 
-def preprocess_data(df, model):
+def preprocess_data(df, model, path_original_data):
     """
     Preprocess the dataset by generating embeddings and standardizing non-text features.
     """
@@ -92,15 +102,15 @@ def preprocess_data(df, model):
     
     # Standardize non-text features
     non_text_features = df.select_dtypes(include=['float64', 'int64'])
-    non_text_features = standardize_numeric(non_text_features)
+    non_text_features_standardized = standardize_numeric(non_text_features, path_original_data)
     
-    # Combine text and non-text features
-    X = np.concatenate([embeddings, non_text_features], axis=1)
+    # Concatenate the embeddings and standardized non-text features
+    X = np.concatenate([embeddings, non_text_features_standardized], axis=1)
 
     return X
 
 
-def input_embedding(input_dict, model):
+def input_embedding(input_dict, model, path_original_data):
     """
     Generate sentence embeddings for the user input data.
     """
@@ -108,7 +118,7 @@ def input_embedding(input_dict, model):
     input_df = pd.DataFrame([input_dict])
 
     # Preprocess the input data
-    embeddings = preprocess_data(input_df, model)
+    embeddings = preprocess_data(input_df, model, path_original_data)
 
     return embeddings
 
@@ -117,25 +127,45 @@ def similarity_input(embeddings, embeddings_matrix):
     """
     Calculate the similarity between the user input and all profiles in the dataset.
     """
-    # Calculate the cosine similarity between the input and all profiles
+    # Calculate the dot product between the user input and all profiles in the dataset
     dot_product = np.dot(embeddings, embeddings_matrix.T)  # Shape (2, 1)
+    # Calculate the norm of the user input and all profiles in the dataset
     norm_array1 = np.linalg.norm(embeddings, axis=1, keepdims=True)  # Shape (2, 1)
+    # Calculate the norm of the embeddings matrix
     norm_array2 = np.linalg.norm(embeddings_matrix, axis=1, keepdims=True)  # Shape (1, 1)
-
+    # Calculate the cosine similarity
     similarities = dot_product / (norm_array1 * norm_array2.T)  # Shape (2, 1)
         
     return similarities
 
+# "okcupid_profiles_preprocessed.npy" is the preprocessed embeddings matrix
+# "all-MiniLM-L6-v2" is the SBERT model
+# "okcupid_profiles_cleaned.csv" is the user data
 
-def generate_top_matches_result(input_dict, top_n=10, **kwarg):
-
-    embeddings_matrix = np.load("okcupid_profiles_preprocessed.npy")
-    sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
-    embeddings = input_embedding(input_dict, sbert_model)
+def generate_top_matches_result(input_dict, 
+                                top_n=10, 
+                                path_embeddings_matrix="okcupid_profiles_preprocessed.npy",
+                                path_user_data="okcupid_profiles_cleaned.csv",
+                                model="all-MiniLM-L6-v2",
+                                **kwarg):
+    """
+    Generate the top matches for the user input.
+    """
+    # Load the preprocessed embeddings matrix
+    embeddings_matrix = np.load(path_embeddings_matrix)
+    # Load the SBERT model
+    sbert_model = SentenceTransformer(model)
+    # Generate embeddings for the user input
+    embeddings = input_embedding(input_dict, sbert_model, path_user_data)
+    # Calculate the similarity between the user input and all profiles in the dataset
     similarity = similarity_input(embeddings, embeddings_matrix)
+    # Convert the similarity array to a DataFrame
     similarity_df = pd.DataFrame(similarity)
-    user_df = pd.read_csv("okcupid_profiles_cleaned.csv")
+    # Load the user data
+    user_df = pd.read_csv(path_user_data)
+    # Generate the top matches for the user input    
     result = get_top_matches(0, similarity_df, user_df, top_n, **kwarg)
+
     return result
 
 # Sample Testing Data
