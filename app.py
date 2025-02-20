@@ -11,12 +11,14 @@ from input import generate_top_matches_result
 from PIL import Image
 # torch
 import torch
+# os
+import os
 
 
 # Streamlit app
 def main():
     # prevent __path__ error
-    torch.classes.__path__ = []
+    torch.classes.__path__ = [os.path.join(torch.__path__[0], torch.classes.__file__)] 
     
     # Set image and the title
     image = Image.open("pic.png")
@@ -152,7 +154,7 @@ def main():
             smoke_option = 'N/A'
 
         #speaks_language(multi)
-        choice_language = ['afrikaans', 'albanian', 'ancient', 'arabic', 'armenian', 'basque', 'belarusan', 'bengali', 'breton', 'bulgarian', 'catalan', 'cebuano', 'chechen', 'chinese', 'croatian', 'c++', 'czech', 'danish', 'dutch', 'english', 'esperanto', 'estonian', 'farsi', 'finnish', 'french', 'frisian', 'georgian', 'german', 'greek', 'gujarati', 'hawaiian', 'hebrew', 'hindi', 'hungarian', 'icelandic', 'ilongo', 'indonesian', 'irish', 'italian', 'japanese', 'khmer', 'korean', 'latin', 'latvian', 'lisp', 'lithuanian', 'malay', 'maori', 'mongolian', 'norwegian', 'occitan', 'persian', 'polish', 'portuguese', 'romanian', 'rotuman',  'russian', 'sanskrit', 'sardinian', 'serbian', 'sign', 'slovak', 'slovenian', 'spanish', 'swahili', 'swedish', 'tagalog', 'tamil',  'thai', 'tibetan', 'turkish', 'ukrainian', 'urdu', 'vietnamese', 'welsh', 'yiddish', 'other']
+        choice_language = ['afrikaans', 'albanian', 'ancient', 'arabic', 'armenian', 'basque', 'belarusan', 'bengali', 'breton', 'bulgarian', 'catalan', 'cebuano', 'chechen', 'chinese', 'croatian', 'czech', 'danish', 'dutch', 'english', 'esperanto', 'estonian', 'farsi', 'finnish', 'french', 'frisian', 'georgian', 'german', 'greek', 'gujarati', 'hawaiian', 'hebrew', 'hindi', 'hungarian', 'icelandic', 'ilongo', 'indonesian', 'irish', 'italian', 'japanese', 'khmer', 'korean', 'latin', 'latvian', 'lisp', 'lithuanian', 'malay', 'maori', 'mongolian', 'norwegian', 'occitan', 'persian', 'polish', 'portuguese', 'romanian', 'rotuman',  'russian', 'sanskrit', 'sardinian', 'serbian', 'sign', 'slovak', 'slovenian', 'spanish', 'swahili', 'swedish', 'tagalog', 'tamil',  'thai', 'tibetan', 'turkish', 'ukrainian', 'urdu', 'vietnamese', 'welsh', 'yiddish', 'other']
         language_option = ", ".join(st.multiselect('What language(s) do you speak?', choice_language))
 
         #essay
