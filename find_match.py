@@ -152,6 +152,9 @@ def get_top_matches(
     # Get valid user IDs
     valid_user_ids = valid_matches.index
 
+    # Remove user ID from valid matches
+    valid_user_ids = valid_user_ids[valid_user_ids != user_id]
+
     # Get similarity scores for valid matches
     filtered_similarities = similarity_df.loc[user_id, valid_user_ids]
 
