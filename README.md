@@ -14,7 +14,7 @@ The dataset includes the following columns:
 The repository is organized into the following files and notebooks:
 
 ### Notebooks
-1. **`Data Cleanse.ipynb`**:
+1. **`Data_Cleanse.ipynb`**:
    - **Input**: `okcupid_profiles.csv`
    - **Output**: `okcupid_profiles_cleaned.csv`
    - **Tasks**:
@@ -77,6 +77,9 @@ The repository is organized into the following files and notebooks:
 9. **`pic.png`**:
    - An image displayed in the Streamlit web application.
 
+10. **`Presentation.pdf`**:
+    - A PDF file containing the slides for presentation. It provides an overview of the project, including the problem statement, methodology, results, and conclusions.
+
 ---
 
 ## Usage
@@ -98,7 +101,7 @@ If you only want to use the **recommendation system**, follow these steps:
 
 3. **Download Preprocessed Data**:
    - Download the preprocessed files (`okcupid_profiles_cleaned.csv`, `okcupid_profiles_preprocessed.npy`, and `similarity_matrix.npy`) from the repository (if available) or generate them by running the following notebooks:
-     - `Data Cleanse.ipynb`
+     - `Data_Cleanse.ipynb`
      - `Embedding.ipynb`
      - `Similarity.ipynb`
 
@@ -127,5 +130,15 @@ If you're interested in exploring the dataset further, you can use the `Data_Gro
 2. **Tableau Dashboard**:
    - The cleaned and grouped dataset (`okcupid_profiles_output.csv`) was used to create an interactive Tableau dashboard for exploratory data analysis.
    - **Link to Tableau Dashboard**: [OkCupid EDA Dashboard](https://public.tableau.com/app/profile/hon.ting.but/viz/EDA_17400899191730/Story)
+
+---
+
+## Presentation
+
+The **`Presentation.pdf`** file contains the slides for presentation. It provides a detailed overview of the project, including:
+- Problem statement and objectives.
+- Methodology and data processing pipeline.
+- Results and insights from the recommendation system and EDA.
+- Conclusions and future work.
 
 ---
