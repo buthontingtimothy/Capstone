@@ -1,8 +1,3 @@
-Got it! If users only want to try the **recommendation system** and skip the EDA part (which involves `Data_Grouping.ipynb` and Tableau), we can make that clear in the **Usage** section. Here's the revised `README.md` with a streamlined **Usage** section for users who only want to use the recommendation system:
-
----
-
-```markdown
 # OkCupid Profiles Analysis and Match Recommendation
 
 This repository provides a comprehensive analysis of the [OkCupid Profiles dataset](https://www.kaggle.com/datasets/andrewmvd/okcupid-profiles) and implements a recommendation system to find top matches based on user input. The dataset contains 60,000 records with structured information (e.g., age, sex, orientation) and text data from open-ended user descriptions.
