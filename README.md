@@ -127,7 +127,7 @@ If you're interested in exploring the dataset further, you can use the `Data_Gro
    - **Tasks**:
      - Group and transform the cleaned dataset for EDA purposes.
 
-2. **Tableau Dashboard**:
+2. **`EDA.twbx`**:
    - The cleaned and grouped dataset (`okcupid_profiles_output.csv`) was used to create an interactive Tableau dashboard for exploratory data analysis.
    - **Link to Tableau Dashboard**: [OkCupid EDA Dashboard](https://public.tableau.com/app/profile/hon.ting.but/viz/EDA_17400899191730/Story)
 
