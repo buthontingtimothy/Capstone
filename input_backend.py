@@ -7,6 +7,7 @@ import pandas as pd
 from find_match import get_top_matches
 # Sentence embeddings
 from sentence_transformers import SentenceTransformer
+import streamlit as st
 
 
 def generate_demographic_sentence(row):
@@ -142,29 +143,94 @@ def similarity_input(embeddings, embeddings_matrix):
 # "all-MiniLM-L6-v2" is the SBERT model
 # "okcupid_profiles_cleaned.csv" is the user data
 
+def check_invalid_input(input_dict):
+    """
+    Check if the input dictionary contains any invalid values.
+    """
+    if not isinstance(input_dict['age'], (int, float)):
+        return "Please input valid age"
+    elif not (16 <= input_dict['age'] <= 120):
+        return "Your age should be between 16 and 120"    
+    
+    if (not isinstance(input_dict['height'], (int, float))):
+        return "Please input valid height"
+    elif not (50 <= input_dict['height'] <= 250):
+        return "Your height should be between 50 and 250"
+    
+    if input_dict['sex'] not in ['male', 'female']:
+        return "Please input valid sex"
+    
+    if input_dict['orientation'] not in ['straight', 'gay', 'bisexual']:
+        return "Please input valid orientation"
+    return None
+
+@st.cache_data(show_spinner=False)
+def load_embeddings_matrix(path_embeddings_matrix="okcupid_profiles_preprocessed.npy"):
+    """
+    Load the preprocessed embeddings matrix.
+    """
+    embeddings_matrix = np.load(path_embeddings_matrix)
+    return embeddings_matrix
+
+@st.cache_data(show_spinner=False)
+def load_model(model="all-MiniLM-L6-v2"):
+    """
+    Load the SBERT model.
+    """
+    sbert_model = SentenceTransformer(model)
+    return sbert_model
+
+@st.cache_data(show_spinner=False)
 def generate_top_matches_result(input_dict, 
-                                top_n=10, 
+                                top_n, 
                                 path_embeddings_matrix="okcupid_profiles_preprocessed.npy",
-                                path_user_data="okcupid_profiles_cleaned.csv",
                                 model="all-MiniLM-L6-v2",
+                                path_user_data="okcupid_profiles_cleaned.csv",                             
                                 **kwarg):
     """
     Generate the top matches for the user input.
     """
+    bar = st.progress(0, text="Operation is started.")
+    
+    # Check for invalid input values
+    if invalid_input := check_invalid_input(input_dict):    
+        return invalid_input
+    bar.progress(10, text='Step 1 of 9: Input data validated!')
+
     # Load the preprocessed embeddings matrix
-    embeddings_matrix = np.load(path_embeddings_matrix)
+    embeddings_matrix = load_embeddings_matrix(path_embeddings_matrix)
+    # embeddings_matrix = np.load(path_embeddings_matrix)
+    bar.progress(30, text='Step 2 of 9: Embeddings matrix loaded!')
+
     # Load the SBERT model
-    sbert_model = SentenceTransformer(model)
+    sbert_model = load_model(model)
+    # sbert_model = SentenceTransformer(model)
+    bar.progress(40, text='Step 3 of 9: SBERT model loaded!')
+
     # Generate embeddings for the user input
     embeddings = input_embedding(input_dict, sbert_model, path_user_data)
+    bar.progress(50, text='Step 4 of 9: Embeddings generated!')
+
     # Calculate the similarity between the user input and all profiles in the dataset
     similarity = similarity_input(embeddings, embeddings_matrix)
+    bar.progress(60, text='Step 5 of 9: Similarity calculated!')
+
     # Convert the similarity array to a DataFrame
     similarity_df = pd.DataFrame(similarity)
+    bar.progress(70, text='Step 6 of 9: Similarity DataFrame created!')
+
     # Load the user data
     user_df = pd.read_csv(path_user_data)
-    # Generate the top matches for the user input    
-    result = get_top_matches(0, similarity_df, user_df, top_n, **kwarg)
+    bar.progress(80, text='Step 7 of 9: User data loaded!')
+
+    # Generate the top matches for the user input  
+    result = get_top_matches(pd.DataFrame([input_dict]), similarity_df, user_df, top_n, **kwarg)
+    bar.progress(90, text='Step 8 of 9: Top matches generated!')
+
+    # set the index to start from 1
+    result = result.set_index(np.arange(1, len(result) + 1), drop=True)
+    result.index.name = "Rank"
+    bar.progress(100, text='Step 9 of 9: Operation completed!')
 
     return result
 
@@ -172,8 +238,8 @@ def generate_top_matches_result(input_dict,
 # input_dict = {
 #     'age': 22.0,
 #     'status': 'single',
-#     'sex': 'male',
-#     'orientation': 'straight',
+#     'sex': 'female',
+#     'orientation': 'gay',
 #     'body_type': 'a little extra',
 #     'diet': 'strictly anything',
 #     'drinks': 'socially',
@@ -197,4 +263,9 @@ def generate_top_matches_result(input_dict,
 # wisper my secrets to.,you want to be swept off your feet! you are tired of the norm. you want to catch a coffee or a bite. or if you want to talk philosophy."""
 # }
 
-# result = generate_top_matches_result(input_dict, age_range=[30,40], height_range=[170,200])
+# result = generate_top_matches_result(input_dict, top_n=10,
+#             path_embeddings_matrix='okcupid_profiles_preprocessed.npy',
+#             path_user_data="okcupid_profiles_cleaned.csv",
+#             age_range=[16, 120],
+#             height_range=[50, 250])
+
