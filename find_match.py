@@ -38,13 +38,22 @@ def get_top_matches(
     Returns:
         pd.DataFrame: Top N matching users.
     """
-
+    
     # Make a copy of the user_df to avoid modifying the original
     user_df = user_df.copy()
 
-    # Get user's gender and orientation
-    user_sex = user_df.loc[user_id, "sex"]
-    user_orientation = user_df.loc[user_id, "orientation"]
+    # Convert all strings to lowercase for case-insensitive matching
+    user_id = user_id.map(lambda x: x.lower() if isinstance(x, str) else x)
+
+    # if user_id is int then get the sex and orientation from user_df else get it from user_id
+    if isinstance(user_id, int):    
+        user_sex = user_df.loc[user_id, "sex"]
+        user_orientation = user_df.loc[user_id, "orientation"]
+    elif isinstance(user_id, pd.DataFrame):
+        user_sex = user_id['sex'].values[0]
+        user_orientation = user_id['orientation'].values[0]
+    else:
+        return None # No valid matches
 
     # Define valid matches based on gender + orientation
     if user_sex == "male":
@@ -71,8 +80,8 @@ def get_top_matches(
                                      (user_df["orientation"].isin(["straight", "bisexual"]))) |
                                     ((user_df["sex"] == "female") & 
                                      (user_df["orientation"].isin(["gay", "bisexual"])))]
-    else:
-        return pd.DataFrame()  # No valid matches
+    else:       
+        return None  # No valid matches
 
     # Apply Numeric Filters
     if age_range:
@@ -152,11 +161,16 @@ def get_top_matches(
     # Get valid user IDs
     valid_user_ids = valid_matches.index
 
-    # Remove user ID from valid matches
-    valid_user_ids = valid_user_ids[valid_user_ids != user_id]
+    if isinstance(user_id, int):
+        # Remove user ID from valid matches
+        valid_user_ids = valid_user_ids[valid_user_ids != user_id]
 
-    # Get similarity scores for valid matches
-    filtered_similarities = similarity_df.loc[user_id, valid_user_ids]
+        # Get similarity scores for valid matches
+        filtered_similarities = similarity_df.iloc[user_id, valid_user_ids]
+    else:
+        # Get similarity scores for valid matches
+        filtered_similarities = similarity_df.iloc[0, valid_user_ids]
+        
 
     # Apply keyword-based filtering (if provided)
     if keyword_filter:
