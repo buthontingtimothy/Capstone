@@ -17,11 +17,12 @@ import os
 # Streamlit app
 def main():
     # prevent __path__ error
-    torch.classes.__path__ = [os.path.join(torch.__path__[0], torch.classes.__file__)] 
-    
+    torch.classes.__path__ = [os.path.join(
+        torch.__path__[0], torch.classes.__file__)]
+
     # Set image and the title
     header()
-    
+
     # Create two columns: left for user input, right for filters
     col1, col2 = st.columns(2)
 
@@ -39,6 +40,7 @@ def main():
     # Select and get recommendation
     # select_recommendation()
     get_recommendation()
+
 
 # Run the app only if this script is run directly (not imported)
 if __name__ == "__main__":
