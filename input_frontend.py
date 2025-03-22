@@ -4,7 +4,7 @@ import streamlit as st
 from PIL import Image
 from input_backend import generate_top_matches_result
 
-limit_recommendation = (10, 100)
+limit_recommendation_min, limit_recommendation_max = (10, 100)
 limit_age_min, limit_age_max = (16, 120)
 limit_height_min, limit_height_max = (50, 250)
 choic_status = ('single', 'married')
@@ -373,7 +373,7 @@ def filter_dict_split(df):
 @st.fragment
 def select_recommendation():
     st.session_state.top_n = st.slider(
-        'Number of Recommendation', min_value=limit_recommendation[0], max_value=limit_recommendation[1], value=limit_recommendation[0], step=5)
+        'Number of Recommendation', min_value=limit_recommendation_min, max_value=limit_recommendation_max, value=limit_recommendation_min, step=5)
 
 
 def recommendation_result(result):
@@ -383,27 +383,30 @@ def recommendation_result(result):
         if len(st.session_state.recommendations) == st.session_state.top_n:
             st.success(
                 f"Here are your top {st.session_state.top_n} recommendations:")
-            st.dataframe(st.session_state.recommendations, width=1000)
+            st.dataframe(st.session_state.recommendations)
         elif len(st.session_state.recommendations) == 0:
             st.error(
                 "No recommendations found. Please try again with different inputs.")
         else:
             st.warning(
                 f"Only {len(st.session_state.recommendations)} recommendation(s) found. Please try again with different inputs.")
-            st.dataframe(st.session_state.recommendations, width=1000)
+            st.dataframe(st.session_state.recommendations)
+
+        # Display User input and Filters
+        st.write("Your input:")
+        st.write(pd.DataFrame([st.session_state.input_dict]))
+        st.write("Your filters:")
+
+        # Split columns ending with '_range' into '_min' and '_max'
+        st.write(filter_dict_split(
+            pd.DataFrame([st.session_state.filter_dict])))
+
+        # Display a thank you message
+        st.write("Thank you for using our service!")
+
     else:
         st.error(
             f"{st.session_state.recommendations}. No recommendations found. Please try again with different inputs.")
-
-    # Display User input and Filters
-    st.write("Your input:")
-    st.write(pd.DataFrame([st.session_state.input_dict]))
-    st.write("Your filters:")
-    # Split columns ending with '_range' into '_min' and '_max'
-    st.write(filter_dict_split(pd.DataFrame([st.session_state.filter_dict])))
-
-    # Display a thank you message
-    st.write("Thank you for using our service!")
 
 
 @st.fragment
